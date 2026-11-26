@@ -1,6 +1,76 @@
 /* Tailwind self-hosted via css/tailwind.css — no CDN config needed */
 
-animate();
+// Initialize GSAP
+gsap.registerPlugin(ScrollTrigger);
+
+// Three.js Background Animation
+const initThreeJS = () => {
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(renderer.domElement);
+
+    // Create particles with brighter colors
+    const particlesGeometry = new THREE.BufferGeometry();
+    const particlesCount = 200;
+    const posArray = new Float32Array(particlesCount * 3);
+    const colorsArray = new Float32Array(particlesCount * 3);
+
+    for (let i = 0; i < particlesCount * 3; i += 3) {
+        posArray[i] = (Math.random() - 0.5) * 50;
+        posArray[i + 1] = (Math.random() - 0.5) * 50;
+        posArray[i + 2] = (Math.random() - 0.5) * 50;
+
+        // Cyan and purple colors
+        if (Math.random() > 0.5) {
+            colorsArray[i] = 0.13;
+            colorsArray[i + 1] = 0.83;
+            colorsArray[i + 2] = 0.93;
+        } else {
+            colorsArray[i] = 0.66;
+            colorsArray[i + 1] = 0.33;
+            colorsArray[i + 2] = 0.97;
+        }
+    }
+
+    particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+    particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colorsArray, 3));
+
+    const particlesMaterial = new THREE.PointsMaterial({
+        size: 0.15,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.8,
+        blending: THREE.AdditiveBlending
+    });
+
+    const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+    scene.add(particlesMesh);
+
+    camera.position.z = 30;
+
+    let mouseX = 0;
+    let mouseY = 0;
+
+    document.addEventListener('mousemove', (event) => {
+        mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+        mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+    });
+
+    const animate = () => {
+        requestAnimationFrame(animate);
+        particlesMesh.rotation.x += 0.0003;
+        particlesMesh.rotation.y += 0.0003;
+        particlesMesh.rotation.x += mouseY * 0.0003;
+        particlesMesh.rotation.y += mouseX * 0.0003;
+        renderer.render(scene, camera);
+    };
+
+    animate();
 
     window.addEventListener('resize', () => {
         camera.aspect = window.innerWidth / window.innerHeight;
