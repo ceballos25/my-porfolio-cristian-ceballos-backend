@@ -134,11 +134,16 @@ const initAnimations = () => {
     });
 };
 
-// Initialize everything
-window.addEventListener('load', () => {
+// Initialize everything (also if load already fired — CF/cache race)
+const boot = () => {
     initThreeJS();
     initAnimations();
-});
+};
+if (document.readyState === 'complete') {
+    boot();
+} else {
+    window.addEventListener('load', boot);
+}
 
 // Smooth scroll for navigation
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
